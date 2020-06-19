@@ -19,15 +19,8 @@ autofmu.main
 .. automodule:: autofmu.main
    :members:
 
+autofmu.cli
+------------
 
-tests
-=====
-
-.. automodule:: tests
-   :members:
-
-test_main
----------
-
-.. automodule:: tests.test_main
+.. automodule:: autofmu.cli
    :members:
