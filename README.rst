@@ -10,10 +10,13 @@ autofmu
    :target: https://autofmu.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
+.. image:: https://codecov.io/gh/ajcerejeira/autofmu/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/ajcerejeira/autofmu
+   :alt: Coverage status
+
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
    :alt: Black code style
-
 
 Automatic FMU approximation tool.
 

@@ -42,6 +42,16 @@ python = "^3.6"
 [tool.poetry.dev-dependencies]
 nox = "^2020.5.24"
 
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+
+[tool.coverage.run]
+branch = true
+source = ["autofmu"]
+
+[tool.coverage.report]
+show_missing = true
+
 [tool.isort]
 multi_line_output = 3
 include_trailing_comma = true

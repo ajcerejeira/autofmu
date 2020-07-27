@@ -13,6 +13,14 @@ def test(session):
     session.run("python", "-m", "unittest")
 
 
+@nox.session(python=["3.8"])
+def coverage(session):
+    session.install(".", "coverage[toml]", "codecov")
+    session.run("coverage", "run", "-m", "unittest")
+    session.run("coverage", "xml", "--fail-under=0")
+    session.run("codecov", *session.posargs)
+
+
 @nox.session
 def format(session):
     args = session.posargs or SOURCE_DIRS
