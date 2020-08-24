@@ -10,7 +10,7 @@ SOURCE_DIRS = "src", "tests", "noxfile.py"
 @nox.session(python=["3.6", "3.7", "3.8"])
 def test(session):
     session.install(".")
-    session.run("python", "-m", "unittest")
+    session.run("python", "-m", "unittest", *session.posargs)
 
 
 @nox.session(python=["3.8"])
@@ -23,39 +23,29 @@ def coverage(session):
 
 @nox.session
 def format(session):
-    args = session.posargs or SOURCE_DIRS
     session.install("black", "isort")
-    session.run("black", *args)
-    session.run("isort", *args)
+    session.run("black", *SOURCE_DIRS)
+    session.run("isort", *SOURCE_DIRS)
 
 
 @nox.session
 def lint(session):
-    args = session.posargs or SOURCE_DIRS
     session.install(
         "flake8-bandit",
         "flake8-black",
         "flake8-bugbear",
         "flake8-docstrings",
-        "flake8-import-order",
+        "flake8-isort",
         "flake8",
         "pep8-naming",
     )
-    session.run(
-        "flake8",
-        "--max-line-length",
-        "80",
-        "--ignore",
-        "E203,E501,W503,S404,S603",
-        *args,
-    )
+    session.run("flake8", *session.posargs, *SOURCE_DIRS)
 
 
 @nox.session
 def typing(session):
-    args = session.posargs or SOURCE_DIRS
     session.install("mypy")
-    session.run("mypy", "--ignore-missing-imports", *args)
+    session.run("mypy", "--ignore-missing-imports", *session.posargs, *SOURCE_DIRS)
 
 
 @nox.session
