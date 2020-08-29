@@ -52,13 +52,10 @@ def typing(session):
 def docs(session):
     session.install(".")
     session.install("-r", "docs/requirements.txt")
-    session.run(
-        "sphinx-build",
-        "-M",
-        "html",
-        "docs",
-        "docs/_build",
-        "--color",
-        "-W",
-        *session.posargs,
-    )
+
+    sphinx_args = ["docs", "docs/_build", "-W"]
+
+    if "serve" in session.posargs:
+        session.run("sphinx-autobuild", *sphinx_args)
+    else:
+        session.run("sphinx-build", *sphinx_args)
