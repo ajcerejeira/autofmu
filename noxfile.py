@@ -1,5 +1,3 @@
-# flake8: noqa
-
 import nox
 
 nox.options.sessions = ["lint", "typing", "test"]

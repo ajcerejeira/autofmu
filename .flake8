@@ -1,3 +1,9 @@
 [flake8]
 max-line-length = 80
 ignore = E203, E501, S404, S603, W503
+
+# Ignore missing docstrings in docs config, noxfile and test files
+per-file-ignores =
+    docs/*.py:D
+    noxfile.py:D
+    tests/*.py:D
