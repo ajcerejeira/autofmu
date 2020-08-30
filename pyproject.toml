@@ -38,6 +38,7 @@ autofmu = "autofmu.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.6"
+fmpy = "^0.2.22"
 
 [tool.poetry.dev-dependencies]
 nox = "^2020.5.24"
