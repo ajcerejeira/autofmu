@@ -24,3 +24,9 @@ autofmu.cli
 
 .. automodule:: autofmu.cli
    :members:
+
+autofmu.generator
+-----------------
+
+.. automodule:: autofmu.generator
+   :members:
