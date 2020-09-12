@@ -30,3 +30,9 @@ autofmu.generator
 
 .. automodule:: autofmu.generator
    :members:
+
+autofmu.utils
+-----------------
+
+.. automodule:: autofmu.utils
+   :members:
