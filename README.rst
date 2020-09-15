@@ -60,6 +60,18 @@ compiler to produce the binaries for Windows platforms (like
 Usage
 =====
 
+``autofmu`` process a dataset
+
+::
+
+   autofmu "dataset.csv" --inputs "x" "y" --outputs "z" -o "My Awesome Model.fmu"
+
+This will read the ``dataset.csv`` file, select the ``x``, ``y`` and ``z``
+columns and find an approximation of the relation between the inputs and the
+outputs. Based on this relation, the sources files for the  FMU will be
+generated and compiled, resulting in the ``My Awesome Model.fmu`` file ready
+to be used for simulations.
+
 .. end-getting-started
 
 

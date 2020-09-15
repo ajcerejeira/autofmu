@@ -1,11 +1,14 @@
 """Utilities for generating valid Functional Mockup Units."""
 from datetime import datetime
+from pathlib import Path
 from typing import Iterable
 from uuid import uuid4
+from zipfile import ZipFile
 
 from lxml import etree as ET  # noqa: N, S
 
 from autofmu import __version__
+from autofmu.utils import slugify
 
 
 def generate_model_description(
@@ -21,6 +24,7 @@ def generate_model_description(
         model_identifier: Short class name according to C syntax, for example, "A_B_C"
         inputs: variable input names
         outputs: variable output names
+
     Returns:
         Valid FMI 2.0 model description XML document
     """
@@ -75,3 +79,36 @@ def generate_model_description(
         )
 
     return ET.ElementTree(root)
+
+
+def generate_fmu(
+    model_name: str, inputs: Iterable[str], outputs: Iterable[str], outfile: Path
+) -> None:
+    """Generate a valid FMU model.
+
+    Arguments:
+        model_name: name of the model as used in the modeling environment
+        inputs: variable input names
+        outputs: variable output names
+        outfile: path to the file to write the FMU
+    """
+    model_identifier = slugify(model_name)
+
+    with ZipFile(outfile, "w") as fmu:
+        # Write model description to the FMU zip file
+        with fmu.open("modelDescription.xml", "w") as model_description_file:
+            model_description = generate_model_description(
+                model_name, model_identifier, inputs, outputs
+            )
+            model_description.write(
+                model_description_file,
+                encoding="utf-8",
+                xml_declaration=True,
+                pretty_print=True,
+            )
+
+        # Write source files to the FMU zip file
+        # TODO
+
+        # Compile the generated source files
+        # TODO
