@@ -2,8 +2,9 @@ import unittest
 from tempfile import NamedTemporaryFile
 
 from fmpy.model_description import read_model_description
+from fmpy.util import validate_fmu
 
-from autofmu.generator import generate_model_description
+from autofmu.generator import generate_fmu, generate_model_description
 
 
 class TestGenerator(unittest.TestCase):
@@ -14,7 +15,6 @@ class TestGenerator(unittest.TestCase):
             inputs=["x", "y"],
             outputs=["z"],
         )
-
         try:
             tmp = NamedTemporaryFile(mode="wb", suffix=".xml", delete=False)
             model_description.write(tmp.name, encoding="utf-8", xml_declaration=True)
@@ -24,6 +24,11 @@ class TestGenerator(unittest.TestCase):
         finally:
             tmp.flush()
             tmp.close()
+
+    def test_generate_fmu_generates_valid_fmu(self):
+        generate_fmu("Test Model", ["x", "y"], ["z"], "test.fmu")
+        errors = validate_fmu("test.fmu")
+        self.assertListEqual(errors, [])
 
 
 if __name__ == "__main__":
