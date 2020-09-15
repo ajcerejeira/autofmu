@@ -40,6 +40,7 @@ autofmu = "autofmu.main:main"
 python = "^3.6"
 fmpy = "^0.2.22"
 lxml = "^4.5.2"
+jinja2 = "^2.11.2"
 
 [tool.poetry.dev-dependencies]
 nox = "^2020.5.24"

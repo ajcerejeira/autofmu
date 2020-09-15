@@ -402,7 +402,7 @@ pipfile_deprecated_finder = ["pipreqs", "requirementslib", "tomlkit (>=0.5.3)"]
 requirements_deprecated_finder = ["pipreqs", "pip-api"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "A very fast and expressive template engine."
 name = "jinja2"
 optional = false
@@ -456,7 +456,7 @@ htmlsoup = ["beautifulsoup4"]
 source = ["Cython (>=0.29.7)"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Safely add untrusted strings to HTML/XML markup."
 name = "markupsafe"
 optional = false
@@ -996,7 +996,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "54df55fbfdecda066449ee00d2ed92cf57f98496a77fd6532ef7b9e4ec2b8496"
+content-hash = "99bb711a4116812e005dcaeaa4df142cfbcccb912a9ae7640780c4c80001cf32"
 lock-version = "1.0"
 python-versions = "^3.6"
 
