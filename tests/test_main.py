@@ -1,6 +1,8 @@
 import contextlib
 import io
+import os
 import unittest
+from tempfile import mkstemp
 
 from fmpy.util import validate_fmu
 
@@ -14,8 +16,10 @@ class TestMain(unittest.TestCase):
 
     def test_main_generates_valid_fmu(self):
         with contextlib.redirect_stdout(io.StringIO()):
-            main(["data.csv", "--inputs", "x", "y", "--outputs", "z", "-o", "test.fmu"])
-            errors = validate_fmu("test.fmu")
+            fp, name = mkstemp()
+            main(["data.csv", "--inputs", "x", "y", "--outputs", "z", "-o", name])
+            errors = validate_fmu(name)
+            os.close(fp)
             self.assertListEqual(errors, [])
 
 

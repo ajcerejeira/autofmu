@@ -1,5 +1,6 @@
+import os
 import unittest
-from tempfile import NamedTemporaryFile
+from tempfile import mkstemp
 
 from fmpy.model_description import read_model_description
 from fmpy.util import validate_fmu
@@ -16,18 +17,19 @@ class TestGenerator(unittest.TestCase):
             outputs=["z"],
         )
         try:
-            tmp = NamedTemporaryFile(mode="wb", suffix=".xml", delete=False)
-            model_description.write(tmp.name, encoding="utf-8", xml_declaration=True)
-            read_model_description(tmp.name, validate_model_structure=True)
+            fp, name = mkstemp(suffix=".xml")
+            model_description.write(name, encoding="utf-8", xml_declaration=True)
+            read_model_description(name, validate_model_structure=True)
         except Exception as e:
             self.fail(e)
         finally:
-            tmp.flush()
-            tmp.close()
+            os.close(fp)
 
     def test_generate_fmu_generates_valid_fmu(self):
-        generate_fmu("Test Model", ["x", "y"], ["z"], "test.fmu")
-        errors = validate_fmu("test.fmu")
+        fp, name = mkstemp(suffix=".fmu")
+        generate_fmu("Test Model", ["x", "y"], ["z"], name)
+        errors = validate_fmu(name)
+        os.close(fp)
         self.assertListEqual(errors, [])
 
 
