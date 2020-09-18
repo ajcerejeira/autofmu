@@ -107,8 +107,13 @@ def generate_fmu(
                 pretty_print=True,
             )
 
+        # Write header files to the FMU zip file
+        headers = (Path(__file__).parent / "sources" / "headers").glob("**/*.h")
+        for header in headers:
+            fmu.write(str(header), f"sources/headers/{header.name}")
+
         # Write source files to the FMU zip file
         # TODO
 
-        # Compile the generated source files
-        # TODO
+    # Compile the generated source files
+    # TODO
