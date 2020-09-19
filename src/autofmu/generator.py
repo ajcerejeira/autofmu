@@ -9,7 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 from lxml import etree as ET  # noqa: N, S
 
 from autofmu import __version__
-from autofmu.utils import slugify
+from autofmu.utils import compile_fmu, slugify
 
 
 def generate_model_description(
@@ -141,4 +141,4 @@ def generate_fmu(
         fmu.writestr("sources/fmi2Functions.c", model_source)
 
     # Compile the generated source files
-    # TODO
+    compile_fmu(model_identifier, outfile)
