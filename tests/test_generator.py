@@ -1,6 +1,7 @@
 import os
 import unittest
 from tempfile import mkstemp
+from uuid import uuid4
 
 from fmpy.model_description import read_model_description
 from fmpy.util import validate_fmu
@@ -13,6 +14,7 @@ class TestGenerator(unittest.TestCase):
         model_description = generate_model_description(
             model_name="Test Model",
             model_identifier="test-model",
+            guid=str(uuid4()),
             inputs=["x", "y"],
             outputs=["z"],
         )

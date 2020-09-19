@@ -5,6 +5,7 @@ from typing import Iterable
 from uuid import uuid4
 from zipfile import ZipFile
 
+from jinja2 import Environment, FileSystemLoader
 from lxml import etree as ET  # noqa: N, S
 
 from autofmu import __version__
@@ -14,6 +15,7 @@ from autofmu.utils import slugify
 def generate_model_description(
     model_name: str,
     model_identifier: str,
+    guid: str,
     inputs: Iterable[str],
     outputs: Iterable[str],
 ) -> ET.ElementTree:
@@ -21,7 +23,8 @@ def generate_model_description(
 
     Arguments:
         model_name: name of the model as used in the modeling environment
-        model_identifier: Short class name according to C syntax, for example, "A_B_C"
+        model_identifier: short class name according to C syntax, for example, "A_B_C"
+        guid: globaly unique identifier that identifies this model
         inputs: variable input names
         outputs: variable output names
 
@@ -33,7 +36,7 @@ def generate_model_description(
         attrib={
             "fmiVersion": "2.0",
             "modelName": model_name,
-            "guid": str(uuid4()),
+            "guid": guid,
             "generationTool": f"autofmu {__version__}",
             "generationDateAndTime": datetime.utcnow().isoformat(),
         },
@@ -81,6 +84,26 @@ def generate_model_description(
     return ET.ElementTree(root)
 
 
+def generate_model_source(
+    guid: str, inputs: Iterable[str], outputs: Iterable[str]
+) -> str:
+    """Generate a valid FMI 2.0 C source code implementation.
+
+    Arguments:
+        guid: globaly unique identifier that identifies this model
+        inputs: variable input names
+        outputs: variable output names
+
+    Returns:
+        Valid C source code that implements the FMI
+    """
+    env = Environment(
+        loader=FileSystemLoader(Path(__file__).parent / "sources"), autoescape=True
+    )
+    template = env.get_template("fmi2Functions.c")
+    return template.render({"guid": guid, "inputs": inputs, "outputs": outputs})
+
+
 def generate_fmu(
     model_name: str, inputs: Iterable[str], outputs: Iterable[str], outfile: Path
 ) -> None:
@@ -93,12 +116,13 @@ def generate_fmu(
         outfile: path to the file to write the FMU
     """
     model_identifier = slugify(model_name)
+    guid = str(uuid4())
 
     with ZipFile(outfile, "w") as fmu:
         # Write model description to the FMU zip file
         with fmu.open("modelDescription.xml", "w") as model_description_file:
             model_description = generate_model_description(
-                model_name, model_identifier, inputs, outputs
+                model_name, model_identifier, guid, inputs, outputs
             )
             model_description.write(
                 model_description_file,
@@ -113,7 +137,8 @@ def generate_fmu(
             fmu.write(str(header), f"sources/headers/{header.name}")
 
         # Write source files to the FMU zip file
-        # TODO
+        model_source = generate_model_source(guid, inputs, outputs)
+        fmu.writestr("sources/fmi2Functions.c", model_source)
 
     # Compile the generated source files
     # TODO
