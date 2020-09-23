@@ -1,12 +1,11 @@
 """General utilities."""
-import platform
 import re
 import shutil
 import subprocess
-import sys
 import unicodedata
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Mapping, Optional
 from zipfile import ZipFile
 
 
@@ -34,49 +33,78 @@ def slugify(value, allow_unicode=False):
     return re.sub(r"[-\s]+", "-", value).strip("-_")
 
 
+def run_cmake(
+    source_dir: Path, build_dir: Path, variables: Optional[Mapping[str, str]] = None
+):
+    """Run cmake command and build the targets.
+
+    Roughly equivalent to running the following two commands:
+
+    .. code-block:: shell
+
+       cmake -S source_dir -B build_dir
+       cmake --build build_dir
+
+    Arguments:
+        source_dir: path to source directory
+        build_dir: path to build directory
+        variables: a mapping between variable names and their values, e.g,
+            ``{"CMAKE_PROJECT_NAME": "Unicorn"}`` would be passed as
+            ``DCMAKE_PROJECT_NAME=Unicorn`` in the command line
+    """
+    cmake = shutil.which("cmake") or "cmake"
+    if variables:
+        args = [f"-D{name}={value}" for name, value in variables.items()]
+    else:
+        args = []
+    subprocess.run(
+        [cmake, *args, "-S", source_dir, "-B", build_dir],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    subprocess.run(
+        [cmake, "--build", build_dir],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
 def compile_fmu(model_identifier: str, fmu_path: Path):
     """Compile the C sources files of an FMU.
 
     Extracts the FMU into a temporary directory, calling cmake to build the FMU,
     copying the generated library back into the FMU file.
+    If `MinGW <http://www.mingw.org/>`_ is installed, it also cross compiles
+    the FMU for Linux and Windows.
 
     Arguments:
         model_identifier: short class name according to C syntax, for example, "A_B_C"
         fmu_path: path to the FMU file
     """
     with ZipFile(fmu_path, "a") as fmu, TemporaryDirectory() as tmpdir:
-        cmake_build_dir = Path(tmpdir) / "build"
         fmu.extractall(tmpdir)
 
-        # Use CMake to compile the FMU
+        # Use CMake to compile the FMU for the current platform
         shutil.copy(Path(__file__).parent / "cmake" / "CMakeLists.txt", tmpdir)
-        subprocess.run(
-            [
-                shutil.which("cmake") or "cmake",
-                f"-DCMAKE_PROJECT_NAME={model_identifier}",
-                "-S",
-                tmpdir,
-                "-B",
-                str(cmake_build_dir),
-            ],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            check=True,
-        )
-        subprocess.run(
-            [shutil.which("cmake") or "cmake", "--build", str(cmake_build_dir)],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            check=True,
-        )
+        build_dir = Path(tmpdir) / "build"
+        run_cmake(Path(tmpdir), build_dir, {"CMAKE_PROJECT_NAME": model_identifier})
 
-        # Copy the generated library to the zip file
-        arch = 64 if sys.maxsize > 2 ** 32 else 32
-        system = platform.system()
-        if system == "Windows":
-            build_dir = f"build/win{arch}"
-        else:
-            build_dir = f"build/{system.lower()}{arch}"
-
-        library = next(cmake_build_dir.glob(f"{model_identifier}.*"))
-        fmu.write(str(library), f"{build_dir}/{library.name}")
+        # Cross compile
+        compilers = (
+            ("i686-linux-gnu-gcc", "Linux"),
+            ("x86_64-linux-gnu-gcc", "Linux"),
+            ("i686-w64-mingw32-gcc", "Windows"),
+            ("x86_64-w64-mingw32-gcc", "Windows"),
+        )
+        for compiler, system in compilers:
+            run_cmake(
+                Path(tmpdir),
+                build_dir / compiler,
+                {
+                    "CMAKE_PROJECT_NAME": model_identifier,
+                    "CMAKE_SYSTEM_NAME": system,
+                    "CMAKE_C_COMPILER": compiler,
+                },
+            )
+        for lib in Path(tmpdir).glob("binaries/**/*"):
+            fmu.write(lib, lib.relative_to(tmpdir))
