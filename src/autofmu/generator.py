@@ -1,4 +1,5 @@
 """Utilities for generating valid Functional Mockup Units."""
+import xml.etree.ElementTree as ET  # noqa: N
 from datetime import datetime
 from pathlib import Path
 from typing import Iterable
@@ -6,10 +7,9 @@ from uuid import uuid4
 from zipfile import ZipFile
 
 from jinja2 import Environment, FileSystemLoader
-from lxml import etree as ET  # noqa: N, S
 
 from autofmu import __version__
-from autofmu.utils import compile_fmu, slugify
+from autofmu.utils import compile_fmu, pretty_print_xml, slugify
 
 
 def generate_model_description(
@@ -120,16 +120,12 @@ def generate_fmu(
 
     with ZipFile(outfile, "w") as fmu:
         # Write model description to the FMU zip file
-        with fmu.open("modelDescription.xml", "w") as model_description_file:
-            model_description = generate_model_description(
-                model_name, model_identifier, guid, inputs, outputs
-            )
-            model_description.write(
-                model_description_file,
-                encoding="utf-8",
-                xml_declaration=True,
-                pretty_print=True,
-            )
+        model_description = generate_model_description(
+            model_name, model_identifier, guid, inputs, outputs
+        )
+        fmu.writestr(
+            "modelDescription.xml", pretty_print_xml(model_description.getroot())
+        )
 
         # Write header files to the FMU zip file
         headers = (Path(__file__).parent / "sources" / "headers").glob("**/*.h")

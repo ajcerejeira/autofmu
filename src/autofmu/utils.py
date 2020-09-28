@@ -3,6 +3,8 @@ import re
 import shutil
 import subprocess
 import unicodedata
+import xml.dom.minidom as minidom  # noqa: S
+import xml.etree.ElementTree as ET  # noqa: N
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Mapping, Optional
@@ -31,6 +33,19 @@ def slugify(value, allow_unicode=False):
         )
     value = re.sub(r"[^\w\s-]", "", value.lower())
     return re.sub(r"[-\s]+", "-", value).strip("-_")
+
+
+def pretty_print_xml(element: ET.Element) -> str:
+    """Transform a XML element into a well formatted and human readable string.
+
+    Arguments:
+        element: XML element to pretty print
+
+    Returns:
+        string that contains the pretty printed dump of the XML elements
+    """
+    dump = ET.tostring(element, encoding="utf-8", xml_declaration=True)
+    return minidom.parseString(dump).toprettyxml(indent="    ")  # noqa: S
 
 
 def run_cmake(
