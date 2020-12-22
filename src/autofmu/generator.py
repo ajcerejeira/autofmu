@@ -56,6 +56,13 @@ def generate_model_description(
     sourcefiles = ET.SubElement(co_simulation, "SourceFiles")
     ET.SubElement(sourcefiles, "File", {"name": f"{model_identifier}.c"})
 
+    # Log categories
+    log_categories = ET.SubElement(root, "LogCategories")
+    ET.SubElement(log_categories, "Category", {"name": "logAll"})
+    ET.SubElement(log_categories, "Category", {"name": "logError"})
+    ET.SubElement(log_categories, "Category", {"name": "logFmiCall"})
+    ET.SubElement(log_categories, "Category", {"name": "logEvent"})
+
     # Model variables and model structure
     model_variables = ET.SubElement(root, "ModelVariables")
     model_structure = ET.SubElement(root, "ModelStructure")
