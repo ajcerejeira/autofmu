@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include "headers/fmi2Functions.h"
 
@@ -8,13 +9,13 @@
 
 /* Build relationship functions that map the inputs to each output */
 {% for output in outputs %}
-fmi2Real R_{{ output }}(fmi2Real inputs[], size_t n) {
+fmi2Real R_{{ output }}(fmi2Real inputs[]) {
     return 0.0;
 }
 {% endfor %}
 
 /* Array of relationship functions that map the inputs to each output*/
-fmi2Real (*R[NOUTPUTS])(fmi2Real[], size_t) = {
+fmi2Real (*R[NOUTPUTS])(fmi2Real[]) = {
     {% for output in outputs %}
     R_{{ output }},
     {% endfor %}
@@ -146,8 +147,10 @@ fmi2Status fmi2GetReal(fmi2Component c,
     size_t i;
     for (i = 0; i < nvr; i++)
     {
-        double (*r)(fmi2Real[], size_t) = R[vr[i]];
-        value[i] = r(VARIABLES, NINPUTS);
+        fmi2ValueReference vref = vr[i];
+        double (*r)(fmi2Real[]) = R[vref - NINPUTS];
+        value[i] = r(VARIABLES);
+        printf("fmi2GetReal: vref=%d value=%f\n", vref, value[i]);
     }
     return fmi2OK;
 }
@@ -184,7 +187,9 @@ fmi2Status fmi2SetReal(fmi2Component c,
     size_t i;
     for (i = 0; i < nvr; i++)
     {
-        VARIABLES[vr[i]] = value[i];
+        fmi2ValueReference vref = vr[i];
+        VARIABLES[vref] = value[i];
+        printf("fmi2SetReal: vref=%d value=%f\n", vref, value[i]);
     }
     return fmi2OK;
 }

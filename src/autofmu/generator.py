@@ -62,21 +62,25 @@ def generate_model_description(
     model_structure_outputs = ET.SubElement(model_structure, "Outputs")
     model_structure_initial_unknowns = ET.SubElement(model_structure, "InitialUnknowns")
 
-    for index, variable in enumerate(inputs, 1):
+    for index, variable in enumerate(inputs):
         scalar_variable = ET.SubElement(
             model_variables,
             "ScalarVariable",
             {"name": variable, "valueReference": str(index), "causality": "input"},
         )
         ET.SubElement(scalar_variable, "Real", {"start": "0.0"})
-    for index, variable in enumerate(outputs, len(list(inputs)) + 1):
+    for index, variable in enumerate(outputs, len(list(inputs))):
         scalar_variable = ET.SubElement(
             model_variables,
             "ScalarVariable",
             {"name": variable, "valueReference": str(index), "causality": "output"},
         )
         ET.SubElement(scalar_variable, "Real")
-        ET.SubElement(model_structure_outputs, "Unknown", {"index": str(index)})
+        ET.SubElement(
+            model_structure_outputs,
+            "Unknown",
+            {"index": str(index), "dependencies": ""},
+        )
         ET.SubElement(
             model_structure_initial_unknowns, "Unknown", {"index": str(index)}
         )
