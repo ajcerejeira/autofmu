@@ -4,15 +4,13 @@ import re
 import shutil
 import subprocess
 import unicodedata
-import xml.dom.minidom as minidom
-import xml.etree.ElementTree as ET  # noqa: N
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Mapping, Optional
+from typing import Any, Mapping, Optional
 from zipfile import ZipFile
 
 
-def slugify(value, allow_unicode=False):
+def slugify(value: Any, allow_unicode: bool = False) -> str:
     """Convert a string to a URL slug.
 
     Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
@@ -36,22 +34,11 @@ def slugify(value, allow_unicode=False):
     return re.sub(r"[-\s]+", "-", value).strip("-_")
 
 
-def pretty_print_xml(element: ET.Element) -> str:
-    """Transform a XML element into a well formatted and human readable string.
-
-    Arguments:
-        element: XML element to pretty print
-
-    Returns:
-        string that contains the pretty printed dump of the XML elements
-    """
-    dump = ET.tostring(element, encoding="utf-8", xml_declaration=True)
-    return minidom.parseString(dump).toprettyxml(indent="    ")
-
-
 def run_cmake(
-    source_dir: Path, build_dir: Path, variables: Optional[Mapping[str, str]] = None
-):
+    source_dir: Path,
+    build_dir: Path,
+    variables: Optional[Mapping[str, str]] = None,
+) -> None:
     """Run cmake command and build the targets.
 
     Roughly equivalent to running the following two commands:
@@ -85,7 +72,7 @@ def run_cmake(
     )
 
 
-def compile_fmu(model_identifier: str, fmu_path: Path):
+def compile_fmu(model_identifier: str, fmu_path: Path) -> None:
     """Compile the C sources files of an FMU.
 
     Extracts the FMU into a temporary directory, calling cmake to build the FMU,

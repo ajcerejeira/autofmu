@@ -1,5 +1,5 @@
 """Utilities for generating valid Functional Mockup Units."""
-import xml.etree.ElementTree as ET  # noqa: N
+
 from datetime import datetime
 from pathlib import Path
 from typing import Iterable
@@ -7,9 +7,10 @@ from uuid import uuid4
 from zipfile import ZipFile
 
 from jinja2 import Environment, FileSystemLoader
+from lxml import etree
 
 from autofmu import __version__
-from autofmu.utils import compile_fmu, pretty_print_xml, slugify
+from autofmu.utils import compile_fmu, slugify
 
 
 def generate_model_description(
@@ -18,7 +19,7 @@ def generate_model_description(
     guid: str,
     inputs: Iterable[str],
     outputs: Iterable[str],
-) -> ET.ElementTree:
+) -> etree.ElementTree:
     """Generate a valid FMI 2.0 model description XML document.
 
     Arguments:
@@ -31,7 +32,7 @@ def generate_model_description(
     Returns:
         Valid FMI 2.0 model description XML document
     """
-    root = ET.Element(
+    root = etree.Element(
         "fmiModelDescription",
         attrib={
             "fmiVersion": "2.0",
@@ -43,60 +44,71 @@ def generate_model_description(
     )
 
     # Model exchange
-    model_exchange = ET.SubElement(
-        root, "ModelExchange", {"modelIdentifier": model_identifier}
+    model_exchange = etree.SubElement(
+        root,
+        "ModelExchange",
+        {"modelIdentifier": model_identifier},
     )
-    sourcefiles = ET.SubElement(model_exchange, "SourceFiles")
-    ET.SubElement(sourcefiles, "File", {"name": f"{model_identifier}.c"})
+    sourcefiles = etree.SubElement(model_exchange, "SourceFiles")
+    etree.SubElement(sourcefiles, "File", {"name": f"{model_identifier}.c"})
 
     # Co simulation
-    co_simulation = ET.SubElement(
-        root, "CoSimulation", {"modelIdentifier": model_identifier}
+    co_simulation = etree.SubElement(
+        root,
+        "CoSimulation",
+        {"modelIdentifier": model_identifier},
     )
-    sourcefiles = ET.SubElement(co_simulation, "SourceFiles")
-    ET.SubElement(sourcefiles, "File", {"name": f"{model_identifier}.c"})
+    sourcefiles = etree.SubElement(co_simulation, "SourceFiles")
+    etree.SubElement(sourcefiles, "File", {"name": f"{model_identifier}.c"})
 
     # Log categories
-    log_categories = ET.SubElement(root, "LogCategories")
-    ET.SubElement(log_categories, "Category", {"name": "logAll"})
-    ET.SubElement(log_categories, "Category", {"name": "logError"})
-    ET.SubElement(log_categories, "Category", {"name": "logFmiCall"})
-    ET.SubElement(log_categories, "Category", {"name": "logEvent"})
+    log_categories = etree.SubElement(root, "LogCategories")
+    etree.SubElement(log_categories, "Category", {"name": "logAll"})
+    etree.SubElement(log_categories, "Category", {"name": "logError"})
+    etree.SubElement(log_categories, "Category", {"name": "logFmiCall"})
+    etree.SubElement(log_categories, "Category", {"name": "logEvent"})
 
     # Model variables and model structure
-    model_variables = ET.SubElement(root, "ModelVariables")
-    model_structure = ET.SubElement(root, "ModelStructure")
-    model_structure_outputs = ET.SubElement(model_structure, "Outputs")
-    model_structure_initial_unknowns = ET.SubElement(model_structure, "InitialUnknowns")
+    model_variables = etree.SubElement(root, "ModelVariables")
+    model_structure = etree.SubElement(root, "ModelStructure")
+    model_structure_outputs = etree.SubElement(model_structure, "Outputs")
+    model_structure_initial_unknowns = etree.SubElement(
+        model_structure,
+        "InitialUnknowns",
+    )
 
     for index, variable in enumerate(inputs, 1):
-        scalar_variable = ET.SubElement(
+        scalar_variable = etree.SubElement(
             model_variables,
             "ScalarVariable",
             {"name": variable, "valueReference": str(index), "causality": "input"},
         )
-        ET.SubElement(scalar_variable, "Real", {"start": "0.0"})
+        etree.SubElement(scalar_variable, "Real", {"start": "0.0"})
     for index, variable in enumerate(outputs, len(list(inputs)) + 1):
-        scalar_variable = ET.SubElement(
+        scalar_variable = etree.SubElement(
             model_variables,
             "ScalarVariable",
             {"name": variable, "valueReference": str(index), "causality": "output"},
         )
-        ET.SubElement(scalar_variable, "Real")
-        ET.SubElement(
+        etree.SubElement(scalar_variable, "Real")
+        etree.SubElement(
             model_structure_outputs,
             "Unknown",
             {"index": str(index), "dependencies": ""},
         )
-        ET.SubElement(
-            model_structure_initial_unknowns, "Unknown", {"index": str(index)}
+        etree.SubElement(
+            model_structure_initial_unknowns,
+            "Unknown",
+            {"index": str(index)},
         )
 
-    return ET.ElementTree(root)
+    return etree.ElementTree(root)
 
 
 def generate_model_source(
-    guid: str, inputs: Iterable[str], outputs: Iterable[str]
+    guid: str,
+    inputs: Iterable[str],
+    outputs: Iterable[str],
 ) -> str:
     """Generate a valid FMI 2.0 C source code implementation.
 
@@ -116,7 +128,10 @@ def generate_model_source(
 
 
 def generate_fmu(
-    model_name: str, inputs: Iterable[str], outputs: Iterable[str], outfile: Path
+    model_name: str,
+    inputs: Iterable[str],
+    outputs: Iterable[str],
+    outfile: Path,
 ) -> None:
     """Generate a valid FMU model.
 
@@ -135,7 +150,8 @@ def generate_fmu(
             model_name, model_identifier, guid, inputs, outputs
         )
         fmu.writestr(
-            "modelDescription.xml", pretty_print_xml(model_description.getroot())
+            "modelDescription.xml",
+            etree.tostring(model_description, pretty_print=True),
         )
 
         # Write header files to the FMU zip file
