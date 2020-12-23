@@ -1,4 +1,5 @@
 """Utilities for exposing a command line interface of the program."""
+
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -15,9 +16,8 @@ def create_argument_parser() -> ArgumentParser:
 
     # General options
     parser.add_argument(
-        "datasets",
+        "dataset",
         metavar="FILE",
-        nargs="+",
         type=Path,
         help="CSV files that contain the datasets for training the FMU model",
     )
