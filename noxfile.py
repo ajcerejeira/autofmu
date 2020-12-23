@@ -8,8 +8,6 @@ import nox
 
 nox.options.sessions = ["lint", "typing", "test"]
 
-SOURCE_DIRS = "src", "tests", "noxfile.py"
-
 
 @nox.session(python=["3.6", "3.7", "3.8"])
 def test(session):
@@ -37,8 +35,8 @@ def lint(session):
 @nox.session
 def typing(session):
     """Type chec the program with mypy."""
-    session.install("mypy")
-    session.run("mypy", "--ignore-missing-imports", *session.posargs, *SOURCE_DIRS)
+    session.install(".[typing]")
+    session.run("mypy", "src/", "tests/")
 
 
 @nox.session
