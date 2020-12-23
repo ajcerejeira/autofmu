@@ -1,9 +1,10 @@
 """General utilities."""
+
 import re
 import shutil
 import subprocess
 import unicodedata
-import xml.dom.minidom as minidom  # noqa: S
+import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET  # noqa: N
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -19,7 +20,7 @@ def slugify(value, allow_unicode=False):
     underscores, or hyphens. Convert to lowercase. Also strip leading and
     trailing whitespace, dashes, and underscores.
 
-    See also:
+    See:
         https://docs.djangoproject.com/en/3.1/ref/utils/#django.utils.text.slugify
     """
     value = str(value)
@@ -45,7 +46,7 @@ def pretty_print_xml(element: ET.Element) -> str:
         string that contains the pretty printed dump of the XML elements
     """
     dump = ET.tostring(element, encoding="utf-8", xml_declaration=True)
-    return minidom.parseString(dump).toprettyxml(indent="    ")  # noqa: S
+    return minidom.parseString(dump).toprettyxml(indent="    ")
 
 
 def run_cmake(

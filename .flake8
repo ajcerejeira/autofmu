@@ -1,9 +1,28 @@
 [flake8]
 max-line-length = 80
-ignore = E203, E501, S404, S603, W503
-
-# Ignore missing docstrings in docs config, noxfile and test files
+select =
+    B       # bugbear
+    B9      # bugbear opiniated
+    BLK     # black
+    C       # mccabe
+    D       # pydocstyle
+    E       # pycodestyle
+    F       # pyflakes
+    I       # isort
+    N       # pep8-naming
+    S       # bandit
+    W       # pycodestyle
+extend-ignore =
+    D106    # missing docstring in public nested class
+    E203    # whitespace before ':'
+    E501    # line too long (82 > 79 characters)
+    W503    # line break before binary operator
+filename =
+    ./noxfile.py
+    ./src/**.py
+    ./tests/**.py
 per-file-ignores =
+    # Ignore missing docstrings in docs config, noxfile and test files
     docs/*.py:D
-    noxfile.py:D
     tests/*.py:D
+docstring-convention = google
