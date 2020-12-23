@@ -42,6 +42,8 @@ python = "^3.6.1"
 cmake = "^3.18.2"
 jinja2 = "^2.11.2"
 lxml = "^4.6.2"
+pandas = "^1.1.5"
+scikit-learn = "^0.24.0"
 black = {version = "^20.8b1", optional = true}
 coverage = {extras = ["toml"], version = "^5.3.1", optional = true}
 flake8 = {version = "^3.8.4", optional = true}
@@ -60,7 +62,7 @@ sphinx-argparse = {version = "^0.2.5", optional = true}
 sphinx-autobuild = {version = "^2020.9.1", optional = true}
 sphinx-autodoc-typehints = {version = "^1.11.1", optional = true}
 sphinx-rtd-theme = {version = "^0.5.0", optional = true}
-pandas = "^1.1.5"
+matplotlib = "^3.3.3"
 
 [tool.poetry.dev-dependencies]
 nox = "^2020.5.24"
