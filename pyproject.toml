@@ -38,7 +38,7 @@ autofmu = "autofmu.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.6"
-fmpy = "^0.2.22"
+fmpy = "0.2.22"
 jinja2 = "^2.11.2"
 cmake = "^3.18.2"
 

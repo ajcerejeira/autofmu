@@ -148,9 +148,8 @@ fmi2Status fmi2GetReal(fmi2Component c,
     for (i = 0; i < nvr; i++)
     {
         fmi2ValueReference vref = vr[i];
-        double (*r)(fmi2Real[]) = R[vref - NINPUTS];
+        double (*r)(fmi2Real[]) = R[vref - NINPUTS - 1];
         value[i] = r(VARIABLES);
-        printf("fmi2GetReal: vref=%d value=%f\n", vref, value[i]);
     }
     return fmi2OK;
 }
@@ -188,8 +187,7 @@ fmi2Status fmi2SetReal(fmi2Component c,
     for (i = 0; i < nvr; i++)
     {
         fmi2ValueReference vref = vr[i];
-        VARIABLES[vref] = value[i];
-        printf("fmi2SetReal: vref=%d value=%f\n", vref, value[i]);
+        VARIABLES[vref - 1] = value[i];
     }
     return fmi2OK;
 }
