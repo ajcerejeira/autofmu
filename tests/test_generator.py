@@ -1,6 +1,3 @@
-import os
-from pathlib import Path
-from tempfile import mkstemp
 from uuid import uuid4
 
 import pytest
@@ -10,7 +7,8 @@ from fmpy.validation import validate_fmu
 from autofmu.generator import generate_fmu, generate_model_description
 
 
-def test_generate_model_description_generates_valid_model_description():
+def test_generate_model_description_generates_valid_model_description(tmp_path):
+    filename = str(tmp_path / "modelDescription.xml")
     model_description = generate_model_description(
         model_name="Test Model",
         model_identifier="test-model",
@@ -18,19 +16,15 @@ def test_generate_model_description_generates_valid_model_description():
         inputs=["x", "y"],
         outputs=["z"],
     )
-    fp, name = mkstemp(suffix=".xml")
     try:
-        model_description.write(name, encoding="utf-8", xml_declaration=True)
-        read_model_description(name, validate_model_structure=True)
+        model_description.write(filename, encoding="utf-8", xml_declaration=True)
+        read_model_description(filename, validate_model_structure=True)
     except Exception as e:
         pytest.fail(str(e))
-    finally:
-        os.close(fp)
 
 
-def test_generate_fmu_generates_valid_fmu():
-    fp, name = mkstemp(suffix=".fmu")
-    generate_fmu("Test Model", ["x", "y"], ["z"], Path(name))
-    errors = validate_fmu(name)
-    os.close(fp)
+def test_generate_fmu_generates_valid_fmu(tmp_path):
+    fmu = tmp_path / "model.fmu"
+    generate_fmu("Test Model", ["x", "y"], ["z"], fmu)
+    errors = validate_fmu(fmu)
     assert not errors
