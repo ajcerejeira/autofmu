@@ -1,7 +1,0 @@
-# Specify the requirements for building the docs here, because readthedocs.org
-# does not yet support reading the dependencies from pyproject.toml
-sphinx==3.2.1
-sphinx_rtd_theme==0.5.0
-sphinx-argparse==0.2.5
-sphinx-autobuild==0.7.1
-sphinx-autodoc-typehints==1.11.0

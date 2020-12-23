@@ -48,8 +48,7 @@ def typing(session):
 
 @nox.session
 def docs(session):
-    session.install(".")
-    session.install("-r", "docs/requirements.txt")
+    session.install(".[docs]")
 
     sphinx_args = ["docs", "docs/_build", "-W"]
 
