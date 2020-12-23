@@ -35,6 +35,4 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - run: pip install nox
-    - run: nox -s coverage
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN}}
+    - run: nox -s test

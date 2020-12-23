@@ -11,18 +11,9 @@ nox.options.sessions = ["lint", "typing", "test"]
 
 @nox.session(python=["3.6", "3.7", "3.8"])
 def test(session):
-    """Run tests."""
-    session.install(".")
-    session.run("python", "-m", "unittest", *session.posargs)
-
-
-@nox.session(python=["3.8"])
-def coverage(session):
-    """Run tests with coverage report."""
-    session.install(".", "coverage[toml]", "codecov")
-    session.run("coverage", "run", "-m", "unittest")
-    session.run("coverage", "xml", "--fail-under=0")
-    session.run("codecov", *session.posargs)
+    """Run tests with pytest."""
+    session.install(".[test]")
+    session.run("pytest", *session.posargs)
 
 
 @nox.session
@@ -43,7 +34,6 @@ def typing(session):
 def docs(session):
     """Build documentation with sphinx."""
     session.install(".[docs]")
-
     sphinx_args = ["docs", "docs/_build", "-W"]
 
     if "serve" in session.posargs:
