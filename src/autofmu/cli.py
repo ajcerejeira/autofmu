@@ -51,5 +51,12 @@ def create_argument_parser() -> ArgumentParser:
         nargs="+",
         help="list of names of the model output variables",
     )
+    parser.add_argument(
+        "-s",
+        "--strategy",
+        choices=["linear"],
+        default="linear",
+        help="strategy to use to deduce the approximation",
+    )
 
     return parser

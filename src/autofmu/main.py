@@ -25,10 +25,17 @@ def main(args: Optional[Sequence[str]] = None) -> None:
     model_name = options.outfile.stem
 
     logging.info("Reading dataset '%s'", options.dataset)
-    dataset = pandas.read_csv(options.dataset)
-    nrows = len(dataset.index)
-    ncols = len(dataset.columns)
+    dataframe = pandas.read_csv(options.dataset)
+    nrows = len(dataframe.index)
+    ncols = len(dataframe.columns)
     logging.info("Read %d rows and %d columns from '%s'", nrows, ncols, options.dataset)
 
     logging.info("Generating FMU '%s'", options.outfile)
-    generate_fmu(model_name, options.inputs, options.outputs, options.outfile)
+    generate_fmu(
+        dataframe=dataframe,  # type: ignore
+        model_name=model_name,
+        inputs=options.inputs,
+        outputs=options.outputs,
+        outfile=options.outfile,
+        strategy=options.strategy,
+    )

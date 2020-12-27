@@ -6,10 +6,12 @@ from typing import Iterable
 from uuid import uuid4
 from zipfile import ZipFile
 
+import pandas
 from jinja2 import Environment, FileSystemLoader
 from lxml import etree
 
 from autofmu import __version__
+from autofmu.strategies import LinearRegressionResult, linear_regression
 from autofmu.utils import compile_fmu, slugify
 
 
@@ -109,6 +111,8 @@ def generate_model_source(
     guid: str,
     inputs: Iterable[str],
     outputs: Iterable[str],
+    strategy: str,
+    result: LinearRegressionResult,
 ) -> str:
     """Generate a valid FMI 2.0 C source code implementation.
 
@@ -116,30 +120,48 @@ def generate_model_source(
         guid: globaly unique identifier that identifies this model
         inputs: variable input names
         outputs: variable output names
+        result: a result from an approximation calculation
 
     Returns:
         Valid C source code that implements the FMI
     """
     env = Environment(
-        loader=FileSystemLoader(Path(__file__).parent / "sources"), autoescape=True
+        block_start_string="/*%",
+        block_end_string="%*/",
+        variable_start_string="/**",
+        variable_end_string="**/",
+        loader=FileSystemLoader(Path(__file__).parent / "sources"),
+        autoescape=True,
     )
     template = env.get_template("fmi2Functions.c")
-    return template.render({"guid": guid, "inputs": inputs, "outputs": outputs})
+    return template.render(
+        {
+            "guid": guid,
+            "inputs": inputs,
+            "outputs": outputs,
+            "strategy": strategy,
+            "result": result,
+        }
+    )
 
 
 def generate_fmu(
+    dataframe: pandas.DataFrame,
     model_name: str,
     inputs: Iterable[str],
     outputs: Iterable[str],
     outfile: Path,
+    strategy: str,
 ) -> None:
     """Generate a valid FMU model.
 
     Arguments:
+        dataframe: dataframe that contains the data used for the approximation
         model_name: name of the model as used in the modeling environment
         inputs: variable input names
         outputs: variable output names
         outfile: path to the file to write the FMU
+        strategy: strategy to use to find the approximation (e.g, "linear")
     """
     model_identifier = slugify(model_name)
     guid = str(uuid4())
@@ -160,7 +182,16 @@ def generate_fmu(
             fmu.write(str(header), f"sources/headers/{header.name}")
 
         # Write source files to the FMU zip file
-        model_source = generate_model_source(guid, inputs, outputs)
+        strategies = {"linear": linear_regression}
+        result = strategies[strategy](dataframe, inputs, outputs)
+
+        model_source = generate_model_source(
+            guid=guid,
+            inputs=inputs,
+            outputs=outputs,
+            strategy=strategy,
+            result=result,
+        )
         fmu.writestr("sources/fmi2Functions.c", model_source)
 
     # Compile the generated source files

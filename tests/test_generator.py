@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+import pandas
 import pytest
 from fmpy.model_description import read_model_description
 from fmpy.validation import validate_fmu
@@ -23,8 +24,16 @@ def test_generate_model_description_generates_valid_model_description(tmp_path):
         pytest.fail(str(e))
 
 
-def test_generate_fmu_generates_valid_fmu(tmp_path):
+def test_generate_fmu_generates_valid_fmu(tmp_path, csvfile):
     fmu = tmp_path / "model.fmu"
-    generate_fmu("Test Model", ["x", "y"], ["z"], fmu)
+    dataframe = pandas.read_csv(csvfile)
+    generate_fmu(
+        dataframe=dataframe,  # type: ignore
+        model_name="Test Model",
+        inputs=["x", "y"],
+        outputs=["z"],
+        outfile=fmu,
+        strategy="linear",
+    )
     errors = validate_fmu(fmu)
     assert not errors
