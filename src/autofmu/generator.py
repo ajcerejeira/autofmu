@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Union
 from uuid import uuid4
 from zipfile import ZipFile
 
@@ -11,7 +11,12 @@ from jinja2 import Environment, FileSystemLoader
 from lxml import etree
 
 from autofmu import __version__
-from autofmu.strategies import LinearRegressionResult, linear_regression
+from autofmu.strategies import (
+    LinearRegressionResult,
+    LogisticRegressionResult,
+    linear_regression,
+    logistic_regression,
+)
 from autofmu.utils import compile_fmu, slugify
 
 
@@ -112,7 +117,7 @@ def generate_model_source(
     inputs: Iterable[str],
     outputs: Iterable[str],
     strategy: str,
-    result: LinearRegressionResult,
+    result: Union[LinearRegressionResult, LogisticRegressionResult],
 ) -> str:
     """Generate a valid FMI 2.0 C source code implementation.
 
@@ -182,8 +187,10 @@ def generate_fmu(
             fmu.write(str(header), f"sources/headers/{header.name}")
 
         # Write source files to the FMU zip file
-        strategies = {"linear": linear_regression}
-        result = strategies[strategy](dataframe, inputs, outputs)
+        if strategy == "linear":
+            result = linear_regression(dataframe, inputs, outputs)  # type: ignore
+        elif strategy == "logistic":
+            result = logistic_regression(dataframe, inputs, outputs)  # type: ignore
 
         model_source = generate_model_source(
             guid=guid,

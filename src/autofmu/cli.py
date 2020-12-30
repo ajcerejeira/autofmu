@@ -54,7 +54,7 @@ def create_argument_parser() -> ArgumentParser:
     parser.add_argument(
         "-s",
         "--strategy",
-        choices=["linear"],
+        choices=["linear", "logistic"],
         default="linear",
         help="strategy to use to deduce the approximation",
     )

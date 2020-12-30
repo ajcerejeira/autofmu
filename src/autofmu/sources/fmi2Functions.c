@@ -1,3 +1,17 @@
+/*%- macro carray(elem) -%*/
+  /*%- if elem is iterable -%*/
+    {
+      /*%- for item in elem -%*/
+        /** carray(item) **//*% if not loop.last %*/, /*% endif %*/
+      /*%- endfor -%*/
+    }
+  /*%- else -%*/
+    /** elem **/
+  /*%- endif -%*/
+/*%- endmacro -%*/
+
+
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -17,9 +31,9 @@ fmi2Real VARIABLES[NVARIABLES];
 /* Linear regression strategy */
 fmi2Real R(fmi2ValueReference vref) {
   const fmi2Real coefs[NOUTPUTS][NINPUTS] = {
-      /*%- for coefs in result.coefs %*/
-      { /** coefs|join(", ") **/ }/*% if not loop.last %*/, /*% endif %*/
-      /*%- endfor %*/
+    /*%- for coefs in result.coefs %*/
+    { /** coefs|join(", ") **/ }/*% if not loop.last %*/, /*% endif %*/
+    /*%- endfor %*/
   };
   const fmi2Real intercept[] = { /** result.intercept|join(", ") **/ };
 
@@ -31,6 +45,34 @@ fmi2Real R(fmi2ValueReference vref) {
     res += coef * input;
   }
   return res;
+}
+/*% elif strategy == "logistic" %*/
+/* Logistic regression strategy */
+fmi2Real R(fmi2ValueReference vref) {
+  #define MAX_ENCODER_RANGE 100
+  size_t output = vref - NOUTPUTS;
+
+  const fmi2Real outcomes[NOUTPUTS][MAX_ENCODER_RANGE] = /** carray(result.outcomes) **/;
+  const size_t klen[NOUTPUTS] = {/** result.outcomes|map("length")|join(", ") **/};
+  const fmi2Real coefs[NOUTPUTS][MAX_ENCODER_RANGE][NINPUTS]  = /** carray(result.coefs) **/;
+  const fmi2Real intercepts[NOUTPUTS][MAX_ENCODER_RANGE] = /** carray(result.intercepts) **/;
+
+  fmi2Real outcome = outcomes[output][0];
+  fmi2Real max_probability = 0.0;
+  for (size_t i = 0; i < klen[output]; i++) {
+      fmi2Real probability = intercepts[output][i];
+      for (size_t j = 0; j < NINPUTS; j++) {
+        fmi2Real coef = coefs[output][i][j];
+        fmi2Real input = VARIABLES[j];
+        probability += coef * input;
+      }
+      probability = 1 / (1 + exp(-probability));
+      if (probability > max_probability) {
+        max_probability = probability;
+        outcome = outcomes[output][i];
+      }
+  }
+  return outcome;
 }
 /*% endif %*/
 
