@@ -30,17 +30,13 @@ fmi2Real VARIABLES[NVARIABLES];
 /*% if strategy == "linear" %*/
 /* Linear regression strategy */
 fmi2Real R(fmi2ValueReference vref) {
-  const fmi2Real coefs[NOUTPUTS][NINPUTS] = {
-    /*%- for coefs in result.coefs %*/
-    { /** coefs|join(", ") **/ }/*% if not loop.last %*/, /*% endif %*/
-    /*%- endfor %*/
-  };
-  const fmi2Real intercept[] = { /** result.intercept|join(", ") **/ };
-
+  const size_t output = vref - NOUTPUTS;
+  const fmi2Real coefs[NOUTPUTS][NINPUTS] = /** carray(result.coefs) **/;
+  const fmi2Real intercept[NOUTPUTS] = /** carray(result.intercept) **/;
+  
   fmi2Real res = intercept[vref - NOUTPUTS];
-  size_t i = 0;
-  for (i = 0; i < NINPUTS; i++) {
-    fmi2Real coef = coefs[vref - NOUTPUTS][i];
+  for (size_t i = 0; i < NINPUTS; i++) {
+    fmi2Real coef = coefs[output][i];
     fmi2Real input = VARIABLES[i];
     res += coef * input;
   }
