@@ -33,7 +33,7 @@ To correctly build an FMU this program needs to compile the generated C source
 into a shared library, therefore it requires the installation of C compilers.
 
 If you are using the provided ``docker`` image to run the program then you are
-already able to cross compile the generated FMU to ``linux32``, ``linus64``,
+already able to cross compile the generated FMU to ``linux32``, ``linux64``,
 ``win32`` and ``win64`` platforms.
 
 Otherwise if you are using a Linux distribution, you probably already have
